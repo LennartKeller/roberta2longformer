@@ -1,16 +1,31 @@
 from collections import OrderedDict
 from tempfile import TemporaryDirectory
+from transformers import LongformerModel, LongformerConfig, LongformerTokenizerFast
+from torch import nn
 
 
 def convert_roberta_to_longformer(
     roberta_model,
     roberta_tokenizer,
-    longformer_model,
-    longformer_max_length: int = None,
+    longformer_max_length: int = 4096,
 ):
 
-    if longformer_max_length is None:
-        longformer_max_length = longformer_model.config.max_position_embeddings + 1
+    ##################################
+    # Create new longformer instance #
+    ##################################
+    longformer_config = LongformerConfig(
+        max_position_embeddings=longformer_max_length + 2, token_type_ids=1
+    )
+    longformer_model = LongformerModel(longformer_config)
+
+    # Set token type embeddig to one embedding (its irrelevant anyway...)
+    # new_token_type_embedding = nn.Embedding(
+    #     num_embeddings=1,
+    #     embedding_dim=longformer_model.embeddings.token_type_embeddings.embedding_dim,
+    # )
+    # setattr(
+    #     longformer_model.embeddings, "token_type_embeddings", new_token_type_embedding
+    # )
 
     ###############################
     # Create longformer tokenizer #
@@ -72,7 +87,6 @@ def convert_roberta_to_longformer(
             ]
         )
         roberta_weights = roberta_parameters[roberta_target_key]
-        orig_weights = longformer_parameters[longformer_key]
         longformer_parameters[longformer_key] = roberta_weights
 
     # Update the state of the longformer model
@@ -84,15 +98,16 @@ def convert_roberta_to_longformer(
     # There are two types of embeddings:
     # 1. Token embeddings
     # 2. Positional embeddings
-    # But we only need to copy the token embeddings
-    # while keeping the positional embeddings fixed.
+    # We only need to copy the token embeddings.
+
+    # We have to resize the token embeddings upfront, to make load_state_dict work.
+    longformer_model.resize_token_embeddings(len(roberta_tokenizer))
 
     roberta_embeddings_parameters = roberta_model.embeddings.state_dict()
     embedding_parameters2copy = []
-    # We have to resize the token embeddings upfront, to make load_state_dict work.
-    longformer_model.resize_token_embeddings(len(roberta_tokenizer))
+
     for key, item in roberta_embeddings_parameters.items():
-        if not "position" in key:
+        if not "position" in key and not "token_type_embeddings" in key:
             embedding_parameters2copy.append((key, item))
     embedding_parameters2copy = OrderedDict(embedding_parameters2copy)
 

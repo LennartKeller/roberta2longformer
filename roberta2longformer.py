@@ -18,15 +18,6 @@ def convert_roberta_to_longformer(
     )
     longformer_model = LongformerModel(longformer_config)
 
-    # Set token type embeddig to one embedding (its irrelevant anyway...)
-    # new_token_type_embedding = nn.Embedding(
-    #     num_embeddings=1,
-    #     embedding_dim=longformer_model.embeddings.token_type_embeddings.embedding_dim,
-    # )
-    # setattr(
-    #     longformer_model.embeddings, "token_type_embeddings", new_token_type_embedding
-    # )
-
     ###############################
     # Create longformer tokenizer #
     ###############################

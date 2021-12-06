@@ -1,6 +1,6 @@
 # roberta2longformer
 
-Convert to pretrained RoBerta models to Longformer models
+Convert pretrained RoBerta models to Longformer models
 
 The memory consumption and runtime of most attention-based language models grows quadratically to the length of the input sequence.
 The `Longformer` model ([Beltagy, I., Peters, M. E., & Cohan, A. (2020).](https://arxiv.org/abs/2004.05150)) relaxes this issue by replacing the plain attention mechanism with sparse attention patterns.

@@ -1,18 +1,16 @@
 from collections import OrderedDict
 from tempfile import TemporaryDirectory
 
+
 def convert_roberta_to_longformer(
     roberta_model,
     roberta_tokenizer,
     longformer_model,
-    longformer_max_length: int = None):
+    longformer_max_length: int = None,
+):
 
     if longformer_max_length is None:
         longformer_max_length = longformer_model.config.max_position_embeddings + 1
-
-
-
-
 
     ###############################
     # Create longformer tokenizer #
@@ -27,9 +25,7 @@ def convert_roberta_to_longformer(
         roberta_tokenizer.save_pretrained(temp_dir)
         longformer_tokenizer = LongformerTokenizerFast.from_pretrained(temp_dir)
     longformer_tokenizer.model_max_length = longformer_max_length
-    longformer_tokenizer.init_kwargs['model_max_length'] = longformer_max_length
-
-
+    longformer_tokenizer.init_kwargs["model_max_length"] = longformer_max_length
 
     ######################
     # Copy model weights #
@@ -38,9 +34,9 @@ def convert_roberta_to_longformer(
     # We only copy the encoder weights and resize the embeddings.
     # Pooler weights are kept untouched.
 
-    #---------#
+    # ---------#
     # Encoder #
-    #---------#
+    # ---------#
     roberta_parameters = roberta_model.encoder.state_dict()
     longformer_parameters = longformer_model.encoder.state_dict()
 
@@ -53,10 +49,28 @@ def convert_roberta_to_longformer(
     # reuse roberta's normal attention weights for those modules.
     for longformer_key in missing_keys:
         # Resolve layer properties
-        prefix, layer_idx, layer_class, layer_type, target, params = longformer_key.split(".")
-        assert layer_class == "attention" or target.endswith("global"), f"Unexcpected parameters {longformer_key}."
+        (
+            prefix,
+            layer_idx,
+            layer_class,
+            layer_type,
+            target,
+            params,
+        ) = longformer_key.split(".")
+        assert layer_class == "attention" or target.endswith(
+            "global"
+        ), f"Unexcpected parameters {longformer_key}."
         # Copy the normal weights attention weights to the global attention layers too
-        roberta_target_key = ".".join([prefix, layer_idx, layer_class, layer_type, target.removesuffix("_global"), params])
+        roberta_target_key = ".".join(
+            [
+                prefix,
+                layer_idx,
+                layer_class,
+                layer_type,
+                target.removesuffix("_global"),
+                params,
+            ]
+        )
         roberta_weights = roberta_parameters[roberta_target_key]
         orig_weights = longformer_parameters[longformer_key]
         longformer_parameters[longformer_key] = roberta_weights
@@ -64,9 +78,9 @@ def convert_roberta_to_longformer(
     # Update the state of the longformer model
     longformer_model.encoder.load_state_dict(longformer_parameters, strict=True)
 
-    #------------#
+    # ------------#
     # Embeddings #
-    #------------#
+    # ------------#
     # There are two types of embeddings:
     # 1. Token embeddings
     # 2. Positional embeddings
@@ -83,6 +97,5 @@ def convert_roberta_to_longformer(
     embedding_parameters2copy = OrderedDict(embedding_parameters2copy)
 
     longformer_model.embeddings.load_state_dict(embedding_parameters2copy, strict=False)
-
 
     return longformer_model, longformer_tokenizer

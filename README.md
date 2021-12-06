@@ -34,4 +34,10 @@ inputs = longformer_tokenizer("Er sah eine irdische Zentralregierung, und er erb
                               "Langsam löste er die Rangabzeichen von dem Schulterstück seiner Kombination.",
                               return_tensors="pt")
 outputs = longformer_model(**inputs)
+
+# Or to finetune the model on a task:
+from transformers import LongformerForSequenceClassification
+
+longformer_model = LongformerModel.from_pretrained("tmp/longformer-gottbert")
+seqclass_model = LongformerForSequenceClassification.from_pretrained("tmp/longformer-gottbert/")
 ```

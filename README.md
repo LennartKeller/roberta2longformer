@@ -41,6 +41,5 @@ from transformers import LongformerForSequenceClassification
 longformer_model.save_pretrained("tmp/longformer-gottbert")
 longformer_tokenizer.save_pretrained("tmp/longformer-gottbert")
 
-longformer_model = LongformerModel.from_pretrained("tmp/longformer-gottbert")
 seqclass_model = LongformerForSequenceClassification.from_pretrained("tmp/longformer-gottbert/")
 ```

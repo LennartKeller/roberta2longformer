@@ -33,5 +33,5 @@ inputs = longformer_tokenizer("Er sah eine irdische Zentralregierung, und er erb
                               "Da lächelte Perry Rhodan zum blauen Himmel empor."
                               "Langsam löste er die Rangabzeichen von dem Schulterstück seiner Kombination.",
                               return_tensors="pt")
-ouputs = longformer_model(**inputs)
+outputs = longformer_model(**inputs)
 ```

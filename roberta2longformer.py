@@ -124,10 +124,10 @@ def convert_roberta_to_longformer(
     n_copies = round(longformer_max_length / roberta_pos_embs.size(0))
 
     # Copy the embeddings and handle the last missing ones.
-    longformer_pos_embs = pos_embs.repeat((n_copies, 1))
+    longformer_pos_embs = roberta_pos_embs.repeat((n_copies, 1))
     n_pos_embs_left = longformer_max_length - longformer_pos_embs.size(0)
     longformer_pos_embs = torch.cat(
-        [longformer_pos_embs, pos_embs[:n_pos_embs_left]], dim=0
+        [longformer_pos_embs, roberta_pos_embs[:n_pos_embs_left]], dim=0
     )
 
     # Add the last extra embeddings.

@@ -41,6 +41,7 @@ def convert_longformer_to_led(
     led_config = LEDConfig.from_dict(converted_config)
     # Set the decoder start token id to eos token id
     led_config.decoder_start_token_id = led_config.eos_token_id
+    led_config.is_encoder_decoder = True
 
     led_model = LEDModel(led_config)
 

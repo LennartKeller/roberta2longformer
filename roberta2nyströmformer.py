@@ -2,6 +2,7 @@ import torch
 from collections import OrderedDict
 from tempfile import TemporaryDirectory
 from transformers import RobertaModel, RobertaTokenizer
+from transformers import AutoTokenizer
 from transformers import NystromformerConfig, NystromformerModel
 
 def convert_roberta_to_nystromformer(
